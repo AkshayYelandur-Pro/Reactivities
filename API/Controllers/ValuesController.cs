@@ -33,7 +33,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<string>> Get(int id)
         {
-           var values = _context.Values.FindAsync(id);
+           var values = await _context.Values.FindAsync(id);
            return Ok(values);
         }
 
