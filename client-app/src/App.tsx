@@ -35,13 +35,7 @@ class App extends Component {
     ))}
   </List>
 
-          {/* <ul>
-            {this.state.values.map((value: any)=>(
-              <li key={value.id}>
-                {value.name}
-              </li>
-            ))}
-          </ul> */}
+
       </div>
     );
   }
