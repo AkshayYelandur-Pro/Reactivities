@@ -4,6 +4,8 @@ import axios from 'axios';
 import { IActivity } from '../Models/activity';
 import { NavBar} from '../../features/nav/NavBar';
 import ActivityDashborad from '../../features/activities/dashboard/ActivityDashborad';
+import agent from '../api/agent';
+import { LoadingComponent } from './LoadingComponent';
 
 interface IState{
   activities: IActivity[]
@@ -13,6 +15,7 @@ const App = ()=> {
 const [activities, SetActivities] = useState<IActivity[]>([])
 const  [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
 const [editMode, setEditMode] = useState(false);
+const [loading, setLoading] = useState(true);
 
 const handleSelectActivity= (id: string) => {
   setSelectedActivity(activities.filter(a=> a.id===id)[0]);
@@ -25,33 +28,44 @@ const handleOpenCreateFor =()=> {
 }
 
 const handleCreateActivity=(activity: IActivity) => {
-  SetActivities([...activities, activity])
-  setSelectedActivity(activity);
-  setEditMode(false);
+  agent.Activities.create(activity).then(()=> {
+    SetActivities([...activities, activity])
+    setSelectedActivity(activity);
+    setEditMode(false);
+  })
+
 }
 
 
 const handleEditActivity=(activity: IActivity) => {
-  SetActivities([...activities.filter(a=>a.id!== activity.id), activity])
-  setSelectedActivity(activity);
-  setEditMode(false);
+  agent.Activities.update(activity).then(()=>{
+    SetActivities([...activities.filter(a=>a.id!== activity.id), activity])
+    setSelectedActivity(activity);
+    setEditMode(false);
+  })
+
 }
 
-const handleDeleteActivity =(id: String) =>{
-  SetActivities([...activities.filter(a=>a.id!== id)])
+const handleDeleteActivity =(id: string) =>{
+  agent.Activities.delete(id).then(()=>{
+    SetActivities([...activities.filter(a=>a.id!== id)])
+  })
+
 }
 
 useEffect(()=> {
-  axios.get<IActivity[]>('http://localhost:5000/api/activities').then((response)=> {
+ agent.Activities.list()
+  .then((response)=> {
     let activities: IActivity[] =[];
-    response.data.forEach(activity=>{
+    response.forEach((activity)=> {
       activity.date= activity.date.split('.')[0]
       activities.push(activity);
-    });
+    })
        SetActivities(activities);
-     });
+     }).then(()=> setLoading(false));
 }, []);
 
+if (loading) return <LoadingComponent content='Loading'/>
 
   return (
     <Fragment>
